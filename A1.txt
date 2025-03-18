@@ -1,0 +1,28 @@
+Assignment 1 - COMPX234
+
+Objective: Design a Print queue with a buffer to solve the issue of more users printing, than there are print machines.
+
+Functional/Non-Functional Requirements:
+	- The buffer size matches the number of printers
+	- A print queue should track the machines currently waiting for an available printer
+	- Create a print request when a machine has something to print
+	- When a printer is free, it retrieves the head of the queue, prints the required text, and removes that item from the queue
+	- If the queue is already full, the machine creates a new print request, undesireably overwriting the tail of the queue, resulting in lost data
+	- The machines sleep for some time, and then wake up and send a print request
+	- Printers also sleep for some time. When they wake up they print the document at the head of the queue
+	
+	
+	"Machine 21 Sent a print request
+	 Machine 22 Sent a print request
+	 Inserted a request in the queue from 22
+	 !!!!!!Attention: Overwrite!!!!!!
+	 Number of requests in the queue 5
+	 Machine 11 Sent a print request
+	 Inserted a request in the queue from 11
+	 !!!!!!Attention: Overwrite!!!!!!"
+	 
+TASK 2:
+
+ - Add synchronization solutions discussed in the lectures to resolve the problem ofoverwriting. 
+ - Control the machines' access to the print queue such that no overwriting takes place, no print request should be sent if the buffer is full until a printer comes available
+ - Control the machines' and printers' access to the print queue such that no two devices (machines and printers_ are accesing the queue at the same time
