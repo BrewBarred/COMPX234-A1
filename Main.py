@@ -1,4 +1,7 @@
+import multiprocessing as mp
 from Assignment1 import Assignment1
 
-sim = Assignment1()
-sim.startSimulation()
+if __name__ == "__main__":
+    mp.freeze_support()
+    sim = Assignment1()
+    sim.startSimulation()

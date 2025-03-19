@@ -1,9 +1,10 @@
-import multiprocessing
+import multiprocessing as mp
 import time
 import random
 
 from printDoc import printDoc
 from printList import printList
+
 
 class Assignment1:
     # Simulation Initialisation parameters
@@ -23,15 +24,24 @@ class Assignment1:
     def startSimulation(self):
         # Create Machine and Printer threads
         # Write code here
-        for _ in range(self.NUM_MACHINES):
-            multiprocessing.BoundedSemaphore
 
+        # for every machine
+        for i in range(self.NUM_MACHINES):
+            #process = mp.Process(target=self.machineThread.run, args=(self, i))
+            # create a new machine process
+            process = mp.Process(target="machineThread.run")
+            # add this machine process the machine process list for tracking
+            self.mThreads.append(process)
+
+        # for every printer
+        for i in range(self.NUM_PRINTERS):
+            #process = mp.Process(target=self.printerThread.run, args=(self, i))
+            process = mp.Process(target="printerThread.run")
+            # add this printer process to the printer process list for tracking
+            self.pThreads.append(process)
 
         # Start all the threads
         # Write code here
-
-        # Let the simulation run for some time
-        time.sleep(self.SIMULATION_TIME)
 
         # Finish simulation
         self.sim_active = False
@@ -40,11 +50,13 @@ class Assignment1:
         # Write code here
 
     # Printer class
-    class printerThread(threading.Thread):
+    class printerThread(mp.Process):
         def __init__(self, printerID, outer):
-            threading.Thread.__init__(self)
+            #mp.Process.__init__(self)
+            super().__init__(self)
             self.printerID = printerID
             self.outer = outer  # Reference to the Assignment1 instance
+            print(f"Created printer process {printerID}")
 
         def run(self):
             while self.outer.sim_active:
@@ -63,11 +75,13 @@ class Assignment1:
             self.outer.print_list.queuePrint(printerID)
 
     # Machine class
-    class machineThread(threading.Thread):
+    class machineThread(mp.Process):
         def __init__(self, machineID, outer):
-            threading.Thread.__init__(self)
+            super().__init__(self)
+            #mp.Process.__init__(self)
             self.machineID = machineID
             self.outer = outer  # Reference to the Assignment1 instance
+            print(f"Created machine process {machineID}")
 
         def run(self):
             while self.outer.sim_active:
@@ -83,6 +97,6 @@ class Assignment1:
         def printRequest(self, id):
             print(f"Machine {id} Sent a print request")
             # Build a print document
-            doc = printDoc(f"My name is machine {id}", id)
+            doc = printDoc(f"My name is machine {id}")
             # Insert it in the print queue
             self.outer.print_list.queueInsert(doc)
