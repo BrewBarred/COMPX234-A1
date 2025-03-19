@@ -31,9 +31,11 @@ class printList:
         elif self.tail is None:
             self.tail = new_node
         # else, the queue is full, replace the tail
-        elif self.queue_size >= self.MAX_SIZE:
-            print("!!!!!!Attention: Overwrite!!!!!!")
+        elif self.queue_size > self.MAX_SIZE:
             self.tail.next = new_node
+        else:
+            self.tail = new_node
+            self.queue_size = self.queue_size -1
 
         # increment request count to easily find tail of queue
         self.queue_size = self.queue_size + 1
