@@ -42,6 +42,12 @@ class Assignment1:
 
         # Start all the threads
         # Write code here
+        for process in self.mThreads + self.pThreads:
+            print(f"Starting process: {process}")
+            process.start()
+
+        # Let the simulation run for some time
+        time.sleep(self.SIMULATION_TIME)
 
         # Finish simulation
         self.sim_active = False
