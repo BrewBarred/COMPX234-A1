@@ -29,8 +29,6 @@ class Assignment1:
             m_process = mp.Process(target=machine.run)
             self.mThreads.append(m_process)
 
-
-
         # # for every machine
         # for i in range(self.NUM_MACHINES):
         #     # create a new machine process
@@ -49,7 +47,7 @@ class Assignment1:
         # Write code here
         for process in self.mThreads + self.pThreads:
             print(f"Starting process: {process}")
-            process.run()
+            process.start()
 
         # Let the simulation run for some time
         print("Sleeping...")
@@ -92,7 +90,7 @@ class Assignment1:
             self.outer.print_list.queuePrint(printerID)
 
     # Machine class
-    class machineThread():
+    class machineThread(mp.Process):
         def __init__(self, machineID, outer):
             super().__init__()
             #mp.Process.__init__(self)
@@ -103,6 +101,7 @@ class Assignment1:
         def run(self):
             print(f"Running machine thread {self.machineID}")
             while self.outer.sim_active:
+                print(f"Sim active {self.outer.sim_active}")
                 # Machine sleeps for a random amount of time
                 self.machineSleep()
                 # Machine wakes up and sends a print request
