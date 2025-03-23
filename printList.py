@@ -1,12 +1,7 @@
-<<<<<<< HEAD
 from multiprocessing.managers import BaseManager
 
 
-class printList():
-=======
 class printList:
->>>>>>> 5924395abba2a9783ecf637369b61a5f5ee67149
-
     class Node:
         # Constructor
         def __init__(self, doc):

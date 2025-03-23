@@ -10,7 +10,8 @@ class Assignment1:
     # Simulation Initialisation parameters
     NUM_MACHINES = 50  # Number of machines that issue print requests
     NUM_PRINTERS = 5  # Number of printers in the system
-    SIMULATION_TIME = 30  # Total simulation time in seconds
+    # TODO: Change back to 30 seconds before submission
+    SIMULATION_TIME = 7  # Total simulation time in seconds
 
     # Initialise simulation variables
     def __init__(self):
@@ -22,11 +23,22 @@ class Assignment1:
     def startSimulation(self):
         # Create Machine and Printer threads
         # Write code here`
-        # with mp.Manager as monitor:
+        # for every machine
         for i in range(6):
+            # create a new machine process
             machine = self.machineThread(i, self.sim_active, self.print_list)
+            # define the machine processes calling function
             m_process = mp.Process(target=machine.run)
+            # add the new process to a list to easily track current processes
             self.mThreads.append(m_process)
+
+        # create a manager to share lists between processes
+        manager = mp.Manager()
+        # setup inter-process communication
+        self.mThreads = manager.list()
+        self.pThreads = manager.list()
+
+
 
         # # for every machine
         # for i in range(self.NUM_MACHINES):
