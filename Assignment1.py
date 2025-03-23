@@ -21,7 +21,7 @@ class Assignment1:
 
     def startSimulation(self):
         # Create Machine and Printer threads
-        # Write code here
+        # Write code here`
         # with mp.Manager as monitor:
         for i in range(6):
             machine = self.machineThread(i, self.sim_active, self.print_list)
@@ -96,18 +96,17 @@ class Assignment1:
     class machineThread(mp.Process):
         MAX_MACHINE_SLEEP = 5  # Maximum sleep time for machines
 
-        def __init__(self, printer_id, sim_active, print_list):
+        def __init__(self, machine_id, sim_active, print_list):
             super().__init__()
             # reference to multiprocess variables
-            self.printer_id = printer_id
+            self.machine_id = machine_id
             self.sim_active = sim_active
             self.print_list = print_list
-            print(f"Created machine process {self.printer_id}")
+            print(f"Created machine process {self.machine_id}")
 
         def run(self):
-            print(f"Running machine thread {self.printer_id}")
+            print(f"Running machine thread {self.machine_id}")
             while self.sim_active:
-                print(f"Sim active {self.sim_active}")
                 # Machine sleeps for a random amount of time
                 self.machineSleep()
                 # Machine wakes up and sends a print request
@@ -121,6 +120,6 @@ class Assignment1:
         def printRequest(self):
             print(f"Machine {id} Sent a print request")
             # Build a print document
-            doc = printDoc(f"My name is machine {self.machineID}", self.machineID)
+            doc = printDoc(f"My name is machine {self.machine_id}", self.machine_id)
             # Insert it in the print queue
             self.print_list.queueInsert(doc)
