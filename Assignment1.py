@@ -12,6 +12,8 @@ class Assignment1:
     NUM_PRINTERS = 5  # Number of printers in the system
     # TODO: Change back to 30 seconds before submission
     SIMULATION_TIME = 7  # Total simulation time in seconds
+    MAX_PRINTER_SLEEP = 3    # Maximum sleep time for printers
+    MAX_MACHINE_SLEEP = 5    # Maximum sleep time for machines
 
     # Initialise simulation variables
     def __init__(self):
@@ -21,18 +23,18 @@ class Assignment1:
         self.pThreads = []  # list for printer threads
 
     def startSimulation(self):
+        print("Creating manager...")
         # create a manager to share lists between processes
         manager = mp.Manager()
         # setup inter-process communication for synchronization
         self.mThreads = manager.list()
         self.pThreads = manager.list()
-
         # Create Machine and Printer threads
         # Write code here`
         # for every machine
         for i in range(self.NUM_MACHINES):
             # create a new machine object
-            machine = self.machineThread(i, self.sim_active, self.print_list)
+            machine = self.machineThread(i + 1, self)
             # use the new machine to create a new process
             m_process = mp.Process(target=machine.run)
             # add the new process to machine list for tracking
@@ -41,19 +43,20 @@ class Assignment1:
         # for every printer
         for i in range(self.NUM_PRINTERS):
             # create a new printer object
-            printer = self.printerThread(i, self.sim_active, self.print_list)
+            printer = self.printerThread(i + 1, self)
             # use the new machine to create a new process
             p_process = mp.Process(target=printer.run)
             # add the new process to printer list for tracking
-            self.pThreads.apent(p_process)
+            self.pThreads.append(p_process)
 
+        print(f"Attempting to start all processes... Machine threads: {len(self.mThreads)}, Printer threads: {len(self.pThreads)}")
         # Start all the threads
         # Write code here
         # for each process in the machine and print thread lists
-        for process in self.mThreads and self.pThreads:
-            # start the process
-            print(f"Starting process: {process}")
-            process.start()
+        # for process in self.mThreads and self.pThreads:
+        #     # start the process
+        #     print(f"Starting process: {process}")
+        #     process.start()
 
         # let the simulation run for some time
         time.sleep(self.SIMULATION_TIME)
@@ -67,65 +70,49 @@ class Assignment1:
         #     process.join()
         print("Processing complete!")
 
-    # Printer class
     class printerThread(mp.Process):
-        MAX_PRINTER_SLEEP = 3  # Maximum sleep time for printers
-
-        def __init__(self, printer_id, sim_active, print_list):
-            #mp.Process.__init__(self)
+        def __init__(self, printerID, outer):
             super().__init__()
-            # reference to multi-process variables
-            self.printer_id = printer_id
-            self.sim_active = sim_active
-            self.print_list = print_list
-            print(f"Created printer process {self.printer_id}")
+            self.printerID = printerID
+            self.outer = outer  # Reference to the Assignment1 instance
 
         def run(self):
-            print(f"Running printer thread {self.printerID}")
-            while self.sim_active:
+            while self.outer.sim_active:
                 # Simulate printer taking some time to print the document
                 self.printerSleep()
                 # Grab the request at the head of the queue and print it
                 # Write code here
 
         def printerSleep(self):
-            print(f"Sleeping printer thread {self.printer_id}")
-            sleepSeconds = random.randint(1, self.MAX_PRINTER_SLEEP)
+            sleepSeconds = random.randint(1, self.outer.MAX_PRINTER_SLEEP)
             time.sleep(sleepSeconds)
 
         def printDox(self, printerID):
             print(f"Printer ID: {printerID} : now available")
             # Print from the queue
-            self.print_list.queuePrint(printerID)
+            self.outer.print_list.queuePrint(printerID)
 
     # Machine class
     class machineThread(mp.Process):
-        MAX_MACHINE_SLEEP = 5  # Maximum sleep time for machines
-
-        def __init__(self, machine_id, sim_active, print_list):
+        def __init__(self, machineID, outer):
             super().__init__()
-            # reference to multiprocess variables
-            self.machine_id = machine_id
-            self.sim_active = sim_active
-            self.print_list = print_list
-            print(f"Created machine process {self.machine_id}")
+            self.machineID = machineID
+            self.outer = outer  # Reference to the Assignment1 instance
 
         def run(self):
-            print(f"Running machine thread {self.machine_id}")
-            while self.sim_active:
+            while self.outer.sim_active:
                 # Machine sleeps for a random amount of time
                 self.machineSleep()
                 # Machine wakes up and sends a print request
                 # Write code here
-                self.printRequest()
 
         def machineSleep(self):
-            sleepSeconds = random.randint(1, self.MAX_MACHINE_SLEEP)
+            sleepSeconds = random.randint(1, self.outer.MAX_MACHINE_SLEEP)
             time.sleep(sleepSeconds)
 
-        def printRequest(self):
+        def printRequest(self, id):
             print(f"Machine {id} Sent a print request")
             # Build a print document
-            doc = printDoc(f"My name is machine {self.machine_id}", self.machine_id)
+            doc = printDoc(f"My name is machine {id}", id)
             # Insert it in the print queue
-            self.print_list.queueInsert(doc)
+            self.outer.print_list.queueInsert(doc)
