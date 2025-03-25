@@ -21,49 +21,42 @@ class Assignment1:
         self.pThreads = []  # list for printer threads
 
     def startSimulation(self):
-        # Create Machine and Printer threads
-        # Write code here`
-        # for every machine
-        for i in range(6):
-            # create a new machine process
-            machine = self.machineThread(i, self.sim_active, self.print_list)
-            # define the machine processes calling function
-            m_process = mp.Process(target=machine.run)
-            # add the new process to a list to easily track current processes
-            self.mThreads.append(m_process)
-
         # create a manager to share lists between processes
         manager = mp.Manager()
-        # setup inter-process communication
+        # setup inter-process communication for synchronization
         self.mThreads = manager.list()
         self.pThreads = manager.list()
 
+        # Create Machine and Printer threads
+        # Write code here`
+        # for every machine
+        for i in range(self.NUM_MACHINES):
+            # create a new machine object
+            machine = self.machineThread(i, self.sim_active, self.print_list)
+            # use the new machine to create a new process
+            m_process = mp.Process(target=machine.run)
+            # add the new process to machine list for tracking
+            self.mThreads.append(m_process)
 
-
-        # # for every machine
-        # for i in range(self.NUM_MACHINES):
-        #     # create a new machine process
-        #     process = mp.Process(target=self.machineThread.run, args=(i, self))
-        #     # add this machine process the machine process list for tracking
-        #     self.mThreads.append(process)
-        #
-        # # for every printer
-        # for i in range(self.NUM_PRINTERS):
-        #     # create a new printer process
-        #     process = mp.Process(target=self.printerThread.run, args=(i, ))
-        #     # add this printer process to the printer process list for tracking
-        #     self.pThreads.append(process)
+        # for every printer
+        for i in range(self.NUM_PRINTERS):
+            # create a new printer object
+            printer = self.printerThread(i, self.sim_active, self.print_list)
+            # use the new machine to create a new process
+            p_process = mp.Process(target=printer.run)
+            # add the new process to printer list for tracking
+            self.pThreads.apent(p_process)
 
         # Start all the threads
         # Write code here
-        for process in self.mThreads:  #+ self.pThreads:
+        # for each process in the machine and print thread lists
+        for process in self.mThreads and self.pThreads:
+            # start the process
             print(f"Starting process: {process}")
             process.start()
 
-        # Let the simulation run for some time
-        print("Sleeping...")
+        # let the simulation run for some time
         time.sleep(self.SIMULATION_TIME)
-        print("Finished sleeping!")
 
         # Finish simulation
         self.sim_active = False
@@ -72,6 +65,7 @@ class Assignment1:
         # Write code here
         # for process in self.mThreads + self.pThreads:
         #     process.join()
+        print("Processing complete!")
 
     # Printer class
     class printerThread(mp.Process):
