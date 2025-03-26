@@ -11,6 +11,15 @@ class printList:
     def __init__(self):
         self.head = None # Head of list
 
+    # Define the __reduce__ method to control how this object is pickled
+    def __reduce__(self):
+        # This will serialize your linked list structure into a tuple
+        return (self.__class__, (self.head,))
+
+    # Define __setstate__ to reconstruct the object during unpickling
+    def __setstate__(self, state):
+        self.head = state[0]
+
     # Insert a print request in the queue
     def queueInsert(self, doc):
         new_node = printList.Node(doc)
