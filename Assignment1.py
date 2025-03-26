@@ -26,9 +26,13 @@ class Assignment1:
         print("Creating manager...")
         # create a manager to share lists between processes
         manager = mp.Manager()
+        #TODO: Confirm that this is supposed to be a QUEUE object or not
         # setup inter-process communication for synchronization
+        self.print_list = manager.Queue()
         self.mThreads = manager.list()
         self.pThreads = manager.list()
+
+        print("Creating machine threads...")
         # Create Machine and Printer threads
         # Write code here`
         # for every machine
@@ -37,9 +41,11 @@ class Assignment1:
             machine = self.machineThread(i + 1, self)
             # use the new machine to create a new process
             m_process = mp.Process(target=machine.run)
+            print(m_process)
             # add the new process to machine list for tracking
             self.mThreads.append(m_process)
 
+        print("Creating printer threads...")
         # for every printer
         for i in range(self.NUM_PRINTERS):
             # create a new printer object
@@ -82,6 +88,7 @@ class Assignment1:
                 self.printerSleep()
                 # Grab the request at the head of the queue and print it
                 # Write code here
+                self.printDox(self.printerID)
 
         def printerSleep(self):
             sleepSeconds = random.randint(1, self.outer.MAX_PRINTER_SLEEP)
@@ -105,6 +112,7 @@ class Assignment1:
                 self.machineSleep()
                 # Machine wakes up and sends a print request
                 # Write code here
+                self.printRequest(self.machineID)
 
         def machineSleep(self):
             sleepSeconds = random.randint(1, self.outer.MAX_MACHINE_SLEEP)
