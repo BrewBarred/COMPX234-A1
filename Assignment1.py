@@ -40,7 +40,8 @@ class Assignment1:
         print("Creating machine threads...")
         tasks = ((i + 1,) for i in range(self.NUM_MACHINES))
         with mp.Pool(self.NUM_MACHINES) as pool:
-            pool.map(self.machineThread.run, (self,))
+            machine = self.machineThread(tasks, self)
+            pool.map(machine.run, tasks)
             # pool.starmap(self.machineThread.run, self)
             # self.mThreads.append(self.machineThread(i + 1, self.sim_active, self.print_list))
 
