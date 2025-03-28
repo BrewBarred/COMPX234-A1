@@ -38,7 +38,6 @@ class Assignment1:
         self.print_list = printList()  # Create an empty list of print requests
         self.mThreads = []  # list for machine threads
         self.pThreads = []  # list for printer threads
-        mp.set_start_method('fork', True)
 
     def startSimulation(self):
         print("Creating manager...")
@@ -52,8 +51,8 @@ class Assignment1:
         BaseManager.register('printList', printList)
         manager = BaseManager()
         manager.start()
-
-        queue = manager.printList()
+        self.print_list = manager.printList()
+        self.print_list.queuePrintAll()
 
         print("Manager started successfully!")
         # # create a manager to share lists between processes
