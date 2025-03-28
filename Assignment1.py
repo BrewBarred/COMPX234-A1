@@ -1,13 +1,26 @@
 import marshal
 import multiprocessing as mp
+from multiprocessing import Pool, freeze_support
 import pickle
 import time
 import random
 import types
-from multiprocessing.process import AuthenticationString
+import time
+from multiprocessing.managers import BaseManager
 
 from printDoc import printDoc
 from printList import printList
+
+# Counting semaphore – integer value can range over an unrestricted domain
+# • Counting semaphores can be used to control access to a given resource consisting of a finite
+# number of instances.
+# • The semaphore is initialized to the number of resources available.
+# • Each process that wishes to use a resource performs a wait() operation on the semaphore
+# (thereby decrementing the count).
+# • When a process releases a resource, it performs a signal() operation (incrementing the
+# count).
+
+PRINT_LIST = printList()
 
 
 class Assignment1:
@@ -21,31 +34,59 @@ class Assignment1:
 
     # Initialise simulation variables
     def __init__(self):
-        self.sim_active = True
+        self.sim_active = None
         self.print_list = printList()  # Create an empty list of print requests
         self.mThreads = []  # list for machine threads
         self.pThreads = []  # list for printer threads
+        mp.set_start_method('fork', True)
 
     def startSimulation(self):
         print("Creating manager...")
-        # create a manager to share lists between processes
-        manager = mp.Manager()
-        print("Setting up inter-process values...")
-        self.print_list = mp.Value('b', True)
-        print("Setting up inter-process lists...")
-        self.print_list = manager.Queue()
-        self.mThreads = manager.list()
-        self.pThreads = manager.list()
 
-        print("Creating machine threads...")
-        tasks = ((i + 1,) for i in range(self.NUM_MACHINES))
-        with mp.Pool(self.NUM_MACHINES) as pool:
-            machine = self.machineThread(tasks, self)
-            pool.map(machine.run, tasks)
+        # #freeze_support()
+        # with BaseManager() as manager:
+        #     manager.register('printList', printList)
+        #     manager.start()
+        #     queue = manager.printList()
+        # Register the custom linked list
+        BaseManager.register('printList', printList)
+        manager = BaseManager()
+        manager.start()
+
+        queue = manager.printList()
+
+        print("Manager started successfully!")
+        # # create a manager to share lists between processes
+        # # BaseManager.register("sim_active", mp.Value('b', True))
+        # # BaseManager.register("mThreads", mp.Manager().list)
+        # # BaseManager.register("pThreads", mp.Manager().list)
+        # # BaseManager.register("printList", printList)
+        # # manager = BaseManager()
+        # # manager.start()
+        # lock = mp.Lock()
+        # print("Setting up inter-process lists...")
+        # # self.print_list = manager.Queue()
+        # # self.mThreads = manager.list()
+        # # self.pThreads = manager.list()
+        # 
+        # print("Creating machine threads...")
+        # ids = ((i + 1) for i in range(self.NUM_MACHINES))
+        # print(f"IDs: {ids}")
+        # 
+        # for i in range(self.NUM_MACHINES):
+        #     machine = self.machineThread(i + 1, self)
+        #     process = mp.Process(target=machine.run)
+        #     self.mThreads.append(process)
+            #mp.Process(target=machine.run, args=(self,))
+
+        # with mp.Pool(self.NUM_MACHINES) as pool:
+        #     machine = self.machineThread(ids, self)
+        #     pool.map(machine.run, ids)
+            #pool.map(self.machineThread.run, ids)
             # pool.starmap(self.machineThread.run, self)
             # self.mThreads.append(self.machineThread(i + 1, self.sim_active, self.print_list))
 
-        #TODO: Confirm that this is supposed to be a QUEUE object or not
+        #TODO: Confirm if this is supposed to be a QUEUE object or not
         # setup inter-process communication for synchronization
         #self.print_list = manager.Queue()
 
@@ -71,11 +112,15 @@ class Assignment1:
         #     # add the new process to printer list for tracking
         #     self.pThreads.append(p_process)
 
-        print(f"Attempting to start all processes... Machine threads: {len(self.mThreads)}, Printer threads: {len(self.pThreads)}")
-        # Start all the threads
-        # Write code here
+        # print(f"Attempting to start all processes... Machine threads: {len(self.mThreads)}, Printer threads: {len(self.pThreads)}")
+        # # Start all the threads
+        # # Write code here
+        # for process in self.mThreads:
+        #     print(f"Starting process: {process}...")
+        #     process.start()
+        #     print("Process started!")
         # for each process in the machine and print thread lists
-        # for process in self.mThreads and self.pThreads:
+        # for process in self.pThreads:
         #     # start the process
         #     print(f"Starting process: {process}")
         #     process.start()
@@ -92,20 +137,8 @@ class Assignment1:
         #     process.join()
         print("Processing complete!")
 
-    def pack(self, fn):
-        code = marshal.dumps(fn.__code__)
-        name = pickle.dumps(fn.__name__)
-        defs = pickle.dumps(fn.__defaults__)
-        clos = pickle.dumps(fn.__closure__)
-        return (code, name, defs, clos)
-
-    def unpack(self, code, name, defs, clos):
-        code = marshal.loads(code)
-        glob = globals()
-        name = pickle.loads(name)
-        defs = pickle.loads(defs)
-        clos = pickle.loads(clos)
-        return types.FunctionType(code, glob, name, defs, clos)
+    class PrintListManager(BaseManager):
+        pass
 
     # Machine class
     class machineThread(mp.Process):
